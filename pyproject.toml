@@ -5,6 +5,7 @@ description = "Why not code through micrograd myself?"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "graphviz>=0.21",
     "matplotlib>=3.10.8",
     "numpy>=2.3.5",
     "torch>=2.9.1",
