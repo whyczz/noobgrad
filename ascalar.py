@@ -1,39 +1,56 @@
 """
 Karpathy's engine.py, or pytorch's ATen
 """
+
 import math
 
 type ScalarLike = "Scalar" | int | float
 
+
 class Scalar:
-    def __init__(self, value: int | float):
+    def __init__(
+        self,
+        value: int | float,
+        parents: tuple["Scalar", ...] | None = None,
+        parent_op: str | None = None,
+    ):
         self.value = value
 
-    def __eq__(self, other):
-        return math.isclose(self.value, other.value)
+        self.grad = 0
+
+        self._parents = parents 
+        self._parent_op = parent_op
 
     # Operators
     def __add__(self, other: ScalarLike) -> "Scalar":
         if not isinstance(other, Scalar):
             other = Scalar.wrap_num(other)
-        return Scalar(value=self.value + other.value)
+        return Scalar(
+            value=self.value + other.value, parents=(self, other), parent_op="+"
+        )
 
     def __mul__(self, other: ScalarLike) -> "Scalar":
         if not isinstance(other, Scalar):
             other = Scalar.wrap_num(other)
-        return Scalar(value=self.value * other.value)
-    
+        return Scalar(
+            value=self.value * other.value, parents=(self, other), parent_op="*"
+        )
+
     def __pow__(self, other: ScalarLike) -> "Scalar":
         if not isinstance(other, Scalar):
             other = Scalar.wrap_num(other)
-        return Scalar(value=self.value ** other.value)
+        return Scalar(
+            value=self.value ** other.value, parents=(self, other), parent_op="**"
+        )
 
     def __neg__(self):
-        return Scalar(value=-self.value)
+        return Scalar(value=-self.value, parents=(self,), parent_op="-")
 
     def __truediv__(self, other: ScalarLike) -> "Scalar":
-        return Scalar(value=self.value * other.value**-1)
-    
+        return Scalar(
+            value=self.value * other.value**-1, parents=(self, other), parent_op="/"
+        )
+
     def __sub__(self, other: ScalarLike) -> "Scalar":
         return self + (-other)
 
@@ -56,12 +73,12 @@ class Scalar:
     def __rtruediv__(self, other: ScalarLike) -> "Scalar":
         if not isinstance(other, Scalar):
             other = Scalar.wrap_num(other)
-        return other / self 
+        return other / self
 
     def __rpow__(self, other: ScalarLike) -> "Scalar":
         if not isinstance(other, Scalar):
             other = Scalar.wrap_num(other)
-        return other ** self
+        return other**self
 
     def __repr__(self):
         return f"Scalar(value={self.value})"
