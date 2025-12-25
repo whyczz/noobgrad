@@ -19,8 +19,8 @@ def trace(root: Scalar) -> tuple[set[Scalar], set[tuple[Scalar, Scalar]]]:
     def build(v: Scalar):
         if v not in nodes:
             nodes.add(v)
-            if v._parents is not None:
-                for parent in v._parents:
+            if v._inputs is not None:
+                for parent in v._inputs:
                     if parent is not None:  # Handle unary ops like __neg__
                         edges.add((parent, v))
                         build(parent)
@@ -57,21 +57,21 @@ def draw_dot(root: Scalar, format: str = "svg", rankdir: str = "TB") -> Digraph:
         # Create a unique ID for this node based on its memory address
         uid = str(id(n))
 
-        # Draw the scalar value as a record node
-        label = f"{{ value: {n.value:.4f} }}"
+        # Draw the scalar output as a record node
+        label = f"{{ output: {n.output:.4f} | grad: {n.grad} }}"
         dot.node(name=uid, label=label, shape="record")
 
         # If this node was created by an operation, add the operation node
-        if n._parent_op:
-            op_uid = uid + n._parent_op
-            dot.node(name=op_uid, label=n._parent_op, shape="circle")
+        if n._op:
+            op_uid = uid + n._op
+            dot.node(name=op_uid, label=n._op, shape="circle")
             # Connect operation to this node
             dot.edge(op_uid, uid)
 
-    # Add edges from parents to operations
+    # Add edges from inputs to operations
     for parent, child in edges:
-        if child._parent_op:
-            op_uid = str(id(child)) + child._parent_op
+        if child._op:
+            op_uid = str(id(child)) + child._op
             dot.edge(str(id(parent)), op_uid)
 
     return dot

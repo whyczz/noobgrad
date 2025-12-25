@@ -1,7 +1,7 @@
 
 ## Changelog
 
-- [0.1] Add a Scalar with a value, repr
+- [0.1] Add a Scalar with a output, repr
 - [0.2] Add operations (add, mul, exp) to Scalar
 - [0.3] Reflected operators, convenience unwrapping ints or floats
 - [0.4] Trace the history of operators, graph it
