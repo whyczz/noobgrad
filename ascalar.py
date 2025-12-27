@@ -60,8 +60,8 @@ class Scalar:
     def _backwards_current_node(self):
         match self._op:
             case '+':
-                for parent in self._inputs:
-                    parent.grad += self.grad
+                for inp in self._inputs:
+                    inp.grad += self.grad
             case '*':
                 a, b = self._inputs
                 a.grad += self.grad * b.output
@@ -69,6 +69,12 @@ class Scalar:
             case '**':
                 base, exp = self._inputs[0], self._exp
                 base.grad += self.grad * (exp*(base.output**(exp-1)))
+            case "exp":
+                inp = self._inputs[0]
+                inp.grad += self.grad * self.output
+            case "tanh":
+                inp = self._inputs[0]
+                inp.grad += self.grad * (1-(self.output**2))
             case None:
                 # leaf node, stop here (base case)
                 pass
@@ -104,6 +110,25 @@ class Scalar:
 
     def __sub__(self, other: ScalarLike) -> "Scalar":
         return self + (-other)
+
+    # Other operators (for a linear layer, we'd need a nonlinear gate function like tanh)
+    def exp(self) -> "Scalar":
+        return Scalar(
+            output=math.exp(self.output), inputs=(self,), op="exp"
+        )
+    
+    def _tanh_with_exp(self) -> "Scalar":
+        e_x = self.exp()
+        neg_e_x = (-self).exp()
+        return (e_x - neg_e_x) / (e_x + neg_e_x)
+
+    def tanh(self) -> "Scalar":
+        """
+        composite e.g fused operator
+        """
+        e_x = math.exp(self.output)
+        neg_e_x = math.exp(-self.output)
+        return Scalar(output=(e_x - neg_e_x)/(e_x + neg_e_x), inputs=(self,), op="tanh")
 
     # Reflected Operators (e.g. other + self)
     def __radd__(self, other: ScalarLike) -> "Scalar":
