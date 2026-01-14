@@ -15,7 +15,7 @@ class Neuron:
         self.w = [Scalar(random.uniform(-1, 1)) for _ in range(n_in)] # weights
         self.b = Scalar(random.uniform(-1, 1)) # bias
     
-    def forward(self, x: Iterable[ScalarLike]) -> Iterable[ScalarLike]:  # x = inputs
+    def forward(self, x: Iterable[ScalarLike]) -> ScalarLike:  # x = inputs
         assert len(x) == len(self.w), f"mismatched num_inputs {len(self.w)=} and input length {len(x)=}"
 
         dot_prod = 0
@@ -34,4 +34,27 @@ class Neuron:
 
     def __str__(self) -> str:
         return f"Neuron({self.w=}, {self.b=})"
+
+
+class Layer:
+    def __init__(self, n_in: int, n_out: int):
+        self.neurons = [Neuron(n_in) for _ in range(n_out)]
+    
+    def forward(self, x: Iterable[ScalarLike]) -> Iterable[Scalar]:
+        outputs = [n(x) for n in self.neurons]
+        return outputs
+
+    def parameters(self) -> Iterable[Scalar]:
+        return [param for n in self.neurons for param in n.parameters()] 
+
+    def __call__(self, x: Iterable[ScalarLike]) -> Iterable[Scalar]:
+        return self.forward(x)
+
+    def __str__(self) -> str:
+        s = "Layer(\n"
+        for neuron in self.neurons:
+            s += (str(neuron) + "\n")
+        s += ")"
+        return s
+
 
