@@ -13,6 +13,5 @@
 - [0.6.3] MLP
 - [0.7] Training loop
     - [x] 0.7.1 loss function - mean squared average
-    - [ ] 0.7.2 single loop - e.g `s.data += learning_rate*s.grad`
-    - [ ] 0.7.3 for loop
+    - [x] 0.7.2 single loop - e.g `s.data += learning_rate*s.grad`
 - [0.8] Training epoch 
